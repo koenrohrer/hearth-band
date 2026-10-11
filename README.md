@@ -46,7 +46,7 @@ The mod API does not report the cache TTL, so choose the one your account gets (
 - If thin lines show between the pixel rows, set your terminal's line height to 1 (VS Code: `terminal.integrated.lineHeight`; also try `terminal.integrated.gpuAcceleration` set to `auto`).
 - The band draws on the terminal and desktop surfaces. The VS Code extension panel has no `Client` element, so nothing is drawn there.
 - The cache countdown starts from the last model response, so it can differ by a few seconds from the real expiry.
-- Ultracode is read from your `ultracode` setting and from `/effort ultracode [off]` typed in the session. A session that started with ultracode already on from a toggle the mod never saw shows it off until you retype the command.
+- Ultracode follows what `/effort` prints (a bare `/effort` toggles it, `/effort ultracode [off]` sets it, any other level turns it off), and is picked up from the transcript when the mod loads. It also honours an `ultracode` setting. `/clear` does not reset the chip.
 - Git info comes from read-only `git status` and `git remote get-url origin` runs (at most every 5 s, with a 3 s timeout). Only `owner/repo` is shown, never the full URL, so credentials in a remote can't leak onto the screen.
 - The mod API is early access and may change.
 

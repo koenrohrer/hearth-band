@@ -1,6 +1,6 @@
 import { expect, mock, test } from 'claude-code/testing'
 
-import { parseStatus, remoteName } from '../hooks/register'
+import { parseStatus, remoteName, ultraFrom } from '../hooks/register'
 
 const BAND = {
   component: 'AbovePrompt',
@@ -65,4 +65,12 @@ test('git status and remote parse without leaking credentials', () => {
   expect(remoteName('https://user:pw@github.com/acme/widget.git')).toBe('acme/widget')
   expect(remoteName('git@github.com:acme/widget.git')).toBe('acme/widget')
   expect(remoteName('')).toBe('')
+})
+
+test('ultracode follows what /effort printed', () => {
+  expect(ultraFrom('Ultracode on (this session only): dynamic workflows on every task. Effort stays high.')).toBe(true)
+  expect(ultraFrom('Ultracode off. Effort stays high.')).toBe(false)
+  expect(ultraFrom('Set effort level to high (saved as your default for new sessions) · Ultracode off')).toBe(false)
+  expect(ultraFrom('<local-command-stdout>Ultracode on (this session only)</local-command-stdout>')).toBe(true)
+  expect(ultraFrom('Effort level: high')).toBeUndefined()
 })

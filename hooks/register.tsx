@@ -23,6 +23,15 @@ export const remoteName = (url: string): string => {
   return m ? m[1] : ''
 }
 
+// "Ultracode on ..." / "Ultracode off ..." in a command's output; undefined when it says neither.
+// The last mention wins: "Set effort level to high ... · Ultracode off" ends with the state.
+export const ultraFrom = (text: string): boolean | undefined => {
+  const all = [...text.matchAll(/Ultracode (on|off)\b/gi)]
+  const last = all[all.length - 1]
+
+  return last ? last[1].toLowerCase() === 'on' : undefined
+}
+
 // One `git status -sb` gives branch, upstream state and the dirty count.
 export const parseStatus = (out: string): Omit<Git, 'remote'> => {
   const [head = '', ...rest] = out.split('\n').filter(Boolean)
@@ -72,6 +81,22 @@ export const register: Register = (on, options) => {
     // itself runs in the Client at its own frame rate.
     $.clock.every(1000, () => $.ui.invalidate('ui.render'))
 
+    // Once per load: pick the toggle up from the transcript, for a resumed session or a mod loaded
+    // after the toggle was typed. The newest user row that says on or off wins.
+    try {
+      const rows = await $.session.messages()
+      for (let k = rows.length - 1; k >= 0; k--) {
+        const row = rows[k]
+        const v = row.role === 'user' && row.text.includes('local-command-stdout') ? ultraFrom(row.text) : undefined
+        if (v !== undefined) {
+          await update($, info, i => ({ ...i, ultraSession: v }))
+          break
+        }
+      }
+    } catch {
+      // no transcript to read: the commands themselves set the state from here on
+    }
+
     return next(e)
   })
 
@@ -88,16 +113,26 @@ export const register: Register = (on, options) => {
     return result
   })
 
-  // The session-only toggle (`/effort ultracode`, `... off`) is in no setting; read it as typed.
-  on('prompt.submit', async ($, e, next) => {
-    const m = /^\/effort\s+(\S+)(?:\s+(\S+))?/i.exec(e.text.trim())
-    if (m) {
-      const isOn = m[1].toLowerCase() === 'ultracode' && (m[2] ?? '').toLowerCase() !== 'off'
-      await update($, info, i => ({ ...i, ultraSession: isOn }))
+  // The session-only toggle is in no setting. A bare `/effort` toggles it, `/effort ultracode [off]` and
+  // any other level set it, so the state follows what the command PRINTED, never what was typed.
+  on('command.run', { command: 'effort' }, async ($, e, next) => {
+    const result = await next(e)
+    const v = ultraFrom(result.text ?? '')
+    if (v !== undefined) await update($, info, i => ({ ...i, ultraSession: v }))
+
+    return result
+  }).catch(($, e, next) => next(e))
+
+  // Fallback, if a command's printed text does not come back: the same output, as the session stores it.
+  on('session.append', { door: 'command' }, async ($, e, next) => {
+    if (e.agentId === undefined && e.message.type !== 'assistant') {
+      const text = e.message.content.map(b => (b.type === 'text' ? String(b.text) : '')).join('')
+      const v = text.includes('local-command-stdout') ? ultraFrom(text) : undefined
+      if (v !== undefined) await update($, info, i => ({ ...i, ultraSession: v }))
     }
 
     return next(e)
-  }).catch((_$, e, next) => next(e))
+  }).catch(($, e, next) => next(e))
 
   on('turn.complete', async ($, e, next) => {
     const now = await $.clock.now()
