@@ -14,6 +14,9 @@ Next to the scene:
 - **Model and effort**, and a rainbow `ULTRACODE` chip (with sparkles) when ultracode is on.
 - **5h and weekly limits** with time to reset.
 - **Context** against your auto-compact window (it reads `autoCompactWindow` and the per-model `modelSettings` from your settings, not the full model window).
+- **Session cost** in dollars, from the same ledger as `/cost`.
+- **Git**: branch, a dirty count (`*3`), ahead/behind the upstream (`↑1 ↓2`) and the `origin` remote as `owner/repo`.
+- **User**: your `git config user.name`, or `$USER` when that is unset.
 - **Prompt cache** countdown. The fire is full while the cache is warm, shrinks to embers, and goes cold (the creature falls asleep) when the cache expires.
 
 The creature's mood shows too: it breathes and blinks when calm, sleeps when the cache is cold, and looks alarmed when context is nearly full or the 5h limit is nearly spent. The scene animates at 5 fps.
@@ -46,6 +49,7 @@ The mod API does not report the cache TTL, so choose the one your account gets (
 - The band draws on the terminal and desktop surfaces. The VS Code extension panel has no `Client` element, so nothing is drawn there.
 - The cache countdown starts from the last model response, so it can differ by a few seconds from the real expiry.
 - Ultracode is read from your `ultracode` setting and from `/effort ultracode [off]` typed in the session. A session that started with ultracode already on from a toggle the mod never saw shows it off until you retype the command.
+- Git info comes from read-only `git status` and `git remote get-url origin` runs (at most every 5 s, with a 3 s timeout). Only `owner/repo` is shown, never the full URL, so credentials in a remote can't leak onto the screen.
 - The mod API is early access and may change.
 
 ## Develop
