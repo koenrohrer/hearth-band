@@ -272,7 +272,9 @@ const Hearth = (p: Props, surface: any) => {
     { text: '  ' },
     { text: word[0] as string, fg: word[1] as RGB, bold: true },
   ]
-  const g = p.git
+  // A reload can hand a running instance the previous version's props for a moment, so every field is defaulted.
+  const g = p.git ?? { branch: '', dirty: 0, ahead: 0, behind: 0, remote: '' }
+  const cost = p.cost ?? null
   const gitRow: Run[] = g.branch
     ? [
         { text: 'git'.padEnd(6), fg: MUTE },
@@ -283,10 +285,10 @@ const Hearth = (p: Props, surface: any) => {
         ...(g.remote ? [{ text: `  ${g.remote}`, fg: MUTE }] : []),
       ]
     : [{ text: 'git'.padEnd(6), fg: MUTE }, { text: 'not a repo', fg: DIM }]
-  const usd = p.cost === null ? '' : p.cost < 10 ? p.cost.toFixed(2) : p.cost.toFixed(1)
+  const usd = cost === null ? '' : cost < 10 ? cost.toFixed(2) : cost.toFixed(1)
   const costRow: Run[] = [
     { text: 'cost'.padEnd(6), fg: MUTE },
-    { text: p.cost === null ? 'n/a' : `$${usd}`, fg: FG, bold: true },
+    { text: cost === null ? 'n/a' : `$${usd}`, fg: FG, bold: true },
     ...(p.user ? [{ text: `  ${p.user}`, fg: MUTE }] : []),
   ]
   const info: Run[][] = [title, limRow('5h', p.five, now, bw), limRow('week', p.week, now, bw), ctx, cache, gitRow, costRow]
