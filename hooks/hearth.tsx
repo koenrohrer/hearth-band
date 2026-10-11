@@ -273,25 +273,29 @@ const Hearth = (p: Props, surface: any) => {
     { text: word[0] as string, fg: word[1] as RGB, bold: true },
   ]
   // A reload can hand a running instance the previous version's props for a moment, so every field is defaulted.
+  // One quiet line under the rest, in the scene's empty last row: cost, git, then who.
+  // A reload can hand a running instance the previous version's props for a moment, so every field is defaulted.
   const g = p.git ?? { branch: '', dirty: 0, ahead: 0, behind: 0, remote: '' }
   const cost = p.cost ?? null
-  const gitRow: Run[] = g.branch
+  const SEP: Run = { text: ' · ', fg: DIM }
+  const costPart: Run[] = cost === null ? [] : [{ text: `$${cost < 10 ? cost.toFixed(2) : cost.toFixed(1)}`, fg: MUTE }]
+  const gitPart: Run[] = g.branch
     ? [
-        { text: 'git'.padEnd(6), fg: MUTE },
-        { text: g.branch, fg: c('79;209;197'), bold: true },
+        { text: g.branch, fg: c('79;209;197') },
         ...(g.dirty ? [{ text: `*${g.dirty}`, fg: AMBER }] : []),
         ...(g.ahead ? [{ text: ` ↑${g.ahead}`, fg: GREEN }] : []),
         ...(g.behind ? [{ text: ` ↓${g.behind}`, fg: RED }] : []),
-        ...(g.remote ? [{ text: `  ${g.remote}`, fg: MUTE }] : []),
       ]
-    : [{ text: 'git'.padEnd(6), fg: MUTE }, { text: 'not a repo', fg: DIM }]
-  const usd = cost === null ? '' : cost < 10 ? cost.toFixed(2) : cost.toFixed(1)
-  const costRow: Run[] = [
-    { text: 'cost'.padEnd(6), fg: MUTE },
-    { text: cost === null ? 'n/a' : `$${usd}`, fg: FG, bold: true },
-    ...(p.user ? [{ text: `  ${p.user}`, fg: MUTE }] : []),
-  ]
-  const info: Run[][] = [title, limRow('5h', p.five, now, bw), limRow('week', p.week, now, bw), ctx, cache, gitRow, costRow]
+    : []
+  const remotePart: Run[] = g.branch && g.remote ? [{ text: g.remote, fg: DIM }] : []
+  const userPart: Run[] = p.user ? [{ text: p.user, fg: DIM }] : []
+  const len = (parts: Run[][]) => parts.reduce((n, r) => n + r.reduce((m, x) => m + x.text.length, 0) + 3, -3)
+  // The line starts under the info column; drop the least useful parts until it fits.
+  const room = p.columns - GW - 4
+  let parts = [costPart, gitPart, remotePart, userPart].filter(x => x.length)
+  for (const drop of [userPart, remotePart]) if (len(parts) > room) parts = parts.filter(x => x !== drop)
+  const footer: Run[] = parts.flatMap((x, i) => (i ? [SEP, ...x] : x))
+  const info: Run[][] = [[], title, limRow('5h', p.five, now, bw), limRow('week', p.week, now, bw), ctx, cache, footer]
 
   const draw = (runs: Run[]) =>
     runs.map(r => (

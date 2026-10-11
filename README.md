@@ -14,9 +14,7 @@ Next to the scene:
 - **Model and effort**, and a rainbow `ULTRACODE` chip (with sparkles) when ultracode is on.
 - **5h and weekly limits** with time to reset.
 - **Context** against your auto-compact window (it reads `autoCompactWindow` and the per-model `modelSettings` from your settings, not the full model window).
-- **Session cost** in dollars, from the same ledger as `/cost`.
-- **Git**: branch, a dirty count (`*3`), ahead/behind the upstream (`↑1 ↓2`) and the `origin` remote as `owner/repo`.
-- **User**: your `git config user.name`, or `$USER` when that is unset.
+- **One quiet line** under the rest: session cost (`$1.23`, the `/cost` ledger), git branch with a dirty count (`*3`) and ahead/behind (`↑1 ↓2`), the `origin` remote as `owner/repo`, and your `git config user.name` (or `$USER`). On a narrow terminal the user, then the remote, drop out first.
 - **Prompt cache** countdown. The fire is full while the cache is warm, shrinks to embers, and goes cold (the creature falls asleep) when the cache expires.
 
 The creature's mood shows too: it breathes and blinks when calm, sleeps when the cache is cold, and looks alarmed when context is nearly full or the 5h limit is nearly spent. The scene animates at 5 fps.

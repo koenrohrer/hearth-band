@@ -1,6 +1,6 @@
 {
   "name": "hearth-band",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Hearth: a pixel creature per model beside a prompt-cache campfire, with your limits and context, animated above the prompt",
   "author": { "name": "koenrohrer" },
   "repository": "https://github.com/koenrohrer/hearth-band",
