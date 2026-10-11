@@ -1,0 +1,4 @@
+# The engine writes these when it loads the mod
+.claude-plugin/types/
+.claude-plugin/tsconfig.json
+node_modules/

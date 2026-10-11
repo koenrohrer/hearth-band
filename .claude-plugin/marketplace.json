@@ -1,0 +1,6 @@
+{
+  "name": "hearth-band",
+  "owner": { "name": "koenrohrer" },
+  "description": "Claude Code mod: a model creature and a prompt-cache campfire above the prompt",
+  "plugins": [{ "name": "hearth-band", "source": "./" }]
+}
